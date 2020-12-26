@@ -73,25 +73,8 @@ bench set-redis-queue-host redis-queue:6379
 bench set-redis-socketio-host redis-socketio:6379
 ```
 
-### Edit Honcho's Procfile
-
-Note : With the option '--skip-redis-config-generation' during bench init, these actions are no more needed. But at least, take a look to ProcFile to see what going on when bench launch honcho on start command
-
-Honcho is the tool used by Bench to manage all the processes Frappe requires. Usually, these all run in localhost, but in this case, we have external containers for Redis. For this reason, we have to stop Honcho from trying to start Redis processes.
-
-Open the Procfile file and remove the three lines containing the configuration from Redis, either by editing manually the file:
-
-```shell
-code Procfile
-```
-
-Or running the following command:
-```shell
-sed -i '/redis/d' ./Procfile
-```
-
 ### Create a new site with bench
-
+#### MariaDB Database (default)
 You can create a new site with the following command:
 
 ```shell
@@ -115,22 +98,32 @@ This will create a new site and a `mysite.localhost` directory under `frappe-ben
 The option `--no-mariadb-socket` will configure site's database credentials to work with docker.
 You may need to configure your system /etc/hosts if you're on Linux, Mac, or its Windows equivalent.
 
-To setup site with PostgreSQL as database use option `--db-type postgres` and `--db-host postgresql`. (Available only v12 onwards, currently NOT available for ERPNext).
+#### PostgreSQL database
 
-Example:
 
-```shell
-bench new-site mypgsql.localhost --db-type postgres --db-host postgresql
-```
-
-To avoid entering postgresql username and root password, set it in `common_site_config.json`,
+To avoid entering postgresql username and root password in the interactive prompt, you can set it beforehand in `common_site_config.json`. 
 
 ```shell
 bench config set-common-config -c root_login postgres
 bench config set-common-config -c root_password '"123"'
 ```
 
-Note: If PostgreSQL is not required, the postgresql service / container can be stopped.
+Did you uncomment the lines regarding postgresql in the file `.devcontainer/docker-compose.yml`? If not, start again.
+
+You will need to run the following command as a temporary workaround:
+
+```shell
+bench set-mariadb-host postgresql 
+```
+
+To setup site with PostgreSQL as database use option `--db-type postgres` and `--db-host postgresql`. (Available only v12 onwards, currently NOT available for ERPNext).
+
+Example:
+
+```shell
+bench new-site mysite.localhost --db-type postgres --db-host postgresql
+```
+
 
 ### Set bench developer mode on the new site
 
@@ -155,7 +148,7 @@ bench get-app --branch version-12 myapp https://github.com/myusername/myapp.git
 bench --site mysite.localhost install-app myapp
 ```
 
-To install ERPNext (from the version-12 branch):
+For example, to install ERPNext (from the version-12 branch):
 
 ```shell
 bench get-app --branch version-12 erpnext https://github.com/frappe/erpnext.git
@@ -236,6 +229,10 @@ frappe.db.connect()
 ```
 
 The first command can take a few seconds to be executed, this is to be expected.
+
+### Resuming your work on VSCode
+
+You can
 
 ### Fixing MariaDB issues after rebuilding the container
 
